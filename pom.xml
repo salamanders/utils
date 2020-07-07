@@ -37,6 +37,36 @@
         </repository>
     </repositories>
 
+    <pluginRepositories>
+        <pluginRepository>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>bintray.kotlin.eap</id>
+            <name>Bintray Kotlin EAP Repository</name>
+            <url>https://dl.bintray.com/kotlin/kotlin-eap</url>
+        </pluginRepository>
+
+        <pluginRepository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>bintray-kotlin-kotlinx</id>
+            <name>bintray-plugins</name>
+            <url>https://kotlin.bintray.com/kotlinx</url>
+        </pluginRepository>
+
+        <pluginRepository>
+            <id>bintray.kotlin.dev</id>
+            <name>Bintray Kotlin DEV Repository</name>
+            <url>https://dl.bintray.com/kotlin/kotlin-dev</url>
+        </pluginRepository>
+
+    </pluginRepositories>
+
     <dependencies>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
