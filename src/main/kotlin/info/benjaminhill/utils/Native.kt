@@ -15,7 +15,7 @@ import kotlin.time.ExperimentalTime
  */
 @ExperimentalTime
 @ExperimentalCoroutinesApi
-internal fun runCommand(
+fun runCommand(
     command: Array<String>,
     workingDir: File = File(".")
 ): Flow<String> = flow {
