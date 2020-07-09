@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.*
  * Map in parallel
  */
 suspend fun <T, R> Flow<T>.concurrentIndexedMap(
-    concurrencyLevel: Int = 6,
+    concurrencyLevel: Int = Runtime.getRuntime().availableProcessors(),
     transform: suspend (Int, T) -> R,
 ) = scopedConcurrentIndexedMap(
     scope = CoroutineScope(currentCoroutineContext()),
@@ -19,7 +19,7 @@ suspend fun <T, R> Flow<T>.concurrentIndexedMap(
 
 private fun <T, R> Flow<T>.scopedConcurrentIndexedMap(
     scope: CoroutineScope,
-    concurrencyLevel: Int = 6,
+    concurrencyLevel: Int,
     transform: suspend (Int, T) -> R,
 ): Flow<R> = this
     .withIndex()
