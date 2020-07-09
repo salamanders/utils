@@ -8,24 +8,24 @@ import kotlinx.coroutines.flow.*
 /**
  * Map in parallel
  */
-suspend fun <T, R> Flow<T>.concurrentMap(
+suspend fun <T, R> Flow<T>.concurrentIndexedMap(
     concurrencyLevel: Int = 6,
-    transform: suspend (T) -> R,
-) = concurrentMap(
+    transform: suspend (Int, T) -> R,
+) = scopedConcurrentIndexedMap(
     scope = CoroutineScope(currentCoroutineContext()),
     concurrencyLevel = concurrencyLevel,
     transform = transform,
 )
 
-private fun <T, R> Flow<T>.concurrentMap(
+private fun <T, R> Flow<T>.scopedConcurrentIndexedMap(
     scope: CoroutineScope,
     concurrencyLevel: Int = 6,
-    transform: suspend (T) -> R,
+    transform: suspend (Int, T) -> R,
 ): Flow<R> = this
-    .map { scope.async { transform(it) } }
+    .withIndex()
+    .map { scope.async { transform(it.index, it.value) } }
     .buffer(concurrencyLevel)
     .map { it.await() }
-
 
 fun <T, R> Flow<T>.zipWithNext(transform: (a: T, b: T) -> R): Flow<R> = flow {
     var last: T? = null
