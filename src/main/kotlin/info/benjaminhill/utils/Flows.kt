@@ -8,16 +8,16 @@ import kotlinx.coroutines.flow.*
 /**
  * Map in parallel
  */
-suspend fun <T, R> Flow<T>.concurrentIndexedMap(
+suspend fun <T, R> Flow<T>.pMap(
     concurrencyLevel: Int = Runtime.getRuntime().availableProcessors(),
     transform: suspend (Int, T) -> R,
-) = scopedConcurrentIndexedMap(
+) = scopedPMap(
     scope = CoroutineScope(currentCoroutineContext()),
     concurrencyLevel = concurrencyLevel,
     transform = transform,
 )
 
-private fun <T, R> Flow<T>.scopedConcurrentIndexedMap(
+private fun <T, R> Flow<T>.scopedPMap(
     scope: CoroutineScope,
     concurrencyLevel: Int,
     transform: suspend (Int, T) -> R,

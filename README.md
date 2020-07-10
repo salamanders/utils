@@ -11,7 +11,7 @@ pom.xml:
   </repository>
 </repositories>
 ```
-and
+
 ```
 <dependency>
   <groupId>com.github.salamanders</groupId>
