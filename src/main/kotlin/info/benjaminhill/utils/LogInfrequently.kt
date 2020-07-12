@@ -11,7 +11,7 @@ import kotlin.time.seconds
  */
 class LogInfrequently @ExperimentalTime constructor(
     private val delay: Duration = 10.seconds,
-    private val logLine: (perSec: Int) -> String = { perSec: Int -> "Running at $perSec/sec" }
+    private val logLine: (perSec: Double) -> String = { perSec: Double -> "Running at ${perSec.r}/sec" }
 ) {
     @ExperimentalTime
     private var startTimeNs = System.nanoTime().nanoseconds
@@ -23,7 +23,7 @@ class LogInfrequently @ExperimentalTime constructor(
         if (now - startTimeNs > delay) {
             val elapsedTime = now - startTimeNs
             val hitPerSecond = hitCount.toDouble() / elapsedTime.inSeconds
-            println(logLine(hitPerSecond.toInt()))
+            println(logLine(hitPerSecond))
             hitCount.set(0)
             startTimeNs = now
         }
