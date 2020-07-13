@@ -17,15 +17,18 @@ class LogInfrequently @ExperimentalTime constructor(
     private var startTimeNs = System.nanoTime().nanoseconds
     private var hitCount = AtomicLong()
 
+
     @ExperimentalTime
     fun hit() {
-        val now = System.nanoTime().nanoseconds
-        if (now - startTimeNs > delay) {
-            val elapsedTime = now - startTimeNs
-            val hitPerSecond = hitCount.toDouble() / elapsedTime.inSeconds
-            println(logLine(hitPerSecond))
-            hitCount.set(0)
-            startTimeNs = now
+        hitCount.incrementAndGet()
+        System.nanoTime().nanoseconds.let { now ->
+            if (now - startTimeNs > delay) {
+                val elapsedTime = now - startTimeNs
+                val hitPerSecond = hitCount.toDouble() / elapsedTime.inSeconds
+                println(logLine(hitPerSecond))
+                hitCount.set(0)
+                startTimeNs = now
+            }
         }
     }
 }
