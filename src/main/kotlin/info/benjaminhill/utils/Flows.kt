@@ -4,12 +4,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.*
+import java.lang.Runtime.getRuntime
 
 /**
- * Map in parallel
+ * Map in parallel.
+ * @param concurrencyLevel 0 would be a standard map.  Don't exceed your cores - 1 unless you really mean it.
  */
 suspend fun <T, R> Flow<T>.pMap(
-    concurrencyLevel: Int = Runtime.getRuntime().availableProcessors(),
+    concurrencyLevel: Int = (getRuntime().availableProcessors() - 1).coerceAtLeast(0),
     transform: suspend (Int, T) -> R,
 ) = scopedPMap(
     scope = CoroutineScope(currentCoroutineContext()),

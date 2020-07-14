@@ -17,7 +17,6 @@ class LogInfrequently @ExperimentalTime constructor(
     private var startTimeNs = System.nanoTime().nanoseconds
     private var hitCount = AtomicLong()
 
-
     @ExperimentalTime
     fun hit() {
         hitCount.incrementAndGet()

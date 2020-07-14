@@ -42,4 +42,7 @@ fun runCommand(
 }
     .buffer()
     .flowOn(Dispatchers.IO)
-    .catch { println("Error while running command `${command.joinToString(" ")}`: $it") }
+    .catch {
+        // Something worse than the Error Stream
+        println("Error while running command `${command.joinToString(" ")}`: $it")
+    }
