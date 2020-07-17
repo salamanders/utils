@@ -2,12 +2,12 @@ package info.benjaminhill.utils
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.time.withTimeout
 import java.io.File
-import kotlin.time.Duration
-import kotlin.time.ExperimentalTime
-import kotlin.time.nanoseconds
-import kotlin.time.seconds
+import kotlin.time.*
 
 
 /**
@@ -16,13 +16,11 @@ import kotlin.time.seconds
  */
 @ExperimentalTime
 @ExperimentalCoroutinesApi
-fun runCommand(
+suspend fun runCommand(
     command: Array<String>,
     workingDir: File = File("."),
     maxDuration: Duration = 5.seconds
-): Flow<String> = flow {
-
-    val startTime = System.nanoTime().nanoseconds
+): Flow<String> = withTimeout(duration = maxDuration.toJavaDuration()) {
 
     val process = ProcessBuilder()
         .redirectErrorStream(true)
@@ -30,19 +28,30 @@ fun runCommand(
         .directory(workingDir)
         .start()!!
 
-    process.inputStream.bufferedReader().use { isr ->
+    // Because you can't expect newlines to happen if the process locked up.
+    val timeChecker = launch {
+        val startTime = System.nanoTime().nanoseconds
+        val sleepDuration = maxDuration / 10
         while (process.isAlive) {
-            val now = System.nanoTime().nanoseconds
-            if (now - startTime > maxDuration) {
-                throw RuntimeException("execution timed out: $this")
+            if (System.nanoTime().nanoseconds - startTime > maxDuration) {
+                process.destroyForcibly()
+                error("Ran over time.")
             }
-            isr.readLine()?.let { emit(it) }
+            delay(sleepDuration)
         }
     }
+
+    process.inputStream
+        .bufferedReader()
+        .lineSequence()
+        .asFlow()
+        .buffer()
+        .flowOn(Dispatchers.IO)
+        .onCompletion {
+            timeChecker.cancel() // redundant
+        }
+        .catch { error ->
+            // Something worse than the Error Stream (like unknown command)
+            error("Error while running command `${command.joinToString(" ")}`: $error")
+        }
 }
-    .buffer()
-    .flowOn(Dispatchers.IO)
-    .catch {
-        // Something worse than the Error Stream
-        println("Error while running command `${command.joinToString(" ")}`: $it")
-    }
