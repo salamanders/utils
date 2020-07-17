@@ -1,7 +1,7 @@
 package info.benjaminhill.utils
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -23,7 +23,7 @@ internal class CommandsKtTest {
         }
 
         runBlocking {
-            assertThrows(TimeoutCancellationException::class.java) {
+            assertThrows(CancellationException::class.java) {
                 runBlocking {
                     runCommand(
                         command = arrayOf("sleep", "3"),

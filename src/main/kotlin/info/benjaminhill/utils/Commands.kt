@@ -1,10 +1,7 @@
 package info.benjaminhill.utils
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.time.withTimeout
 import java.io.File
 import kotlin.time.*
@@ -21,27 +18,26 @@ suspend fun runCommand(
     workingDir: File = File("."),
     maxDuration: Duration = 5.seconds
 ): Flow<String> = withTimeout(duration = maxDuration.toJavaDuration()) {
-
-    val process = ProcessBuilder()
+    val timeChecker: Job
+    ProcessBuilder()
         .redirectErrorStream(true)
         .command(*command)
         .directory(workingDir)
-        .start()!!
-
-    // Because you can't expect newlines to happen if the process locked up.
-    val timeChecker = launch {
-        val startTime = System.nanoTime().nanoseconds
-        val sleepDuration = maxDuration / 10
-        while (process.isAlive) {
-            if (System.nanoTime().nanoseconds - startTime > maxDuration) {
-                process.destroyForcibly()
-                error("Ran over time.")
+        .start()!!.also { process ->
+            // Because you can't expect newlines to happen if the process locked up.
+            timeChecker = launch {
+                val startTime = System.nanoTime().nanoseconds
+                val sleepDuration = maxDuration / 20
+                while (process.isAlive) {
+                    if (System.nanoTime().nanoseconds - startTime > maxDuration) {
+                        process.destroyForcibly()
+                        throw CancellationException("Ran over time: $maxDuration")
+                    }
+                    delay(sleepDuration)
+                }
             }
-            delay(sleepDuration)
         }
-    }
-
-    process.inputStream
+        .inputStream
         .bufferedReader()
         .lineSequence()
         .asFlow()
