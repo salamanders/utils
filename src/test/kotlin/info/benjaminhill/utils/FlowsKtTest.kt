@@ -1,12 +1,14 @@
 package info.benjaminhill.utils
 
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.collectIndexed
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.io.File
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
 import kotlin.time.seconds
@@ -36,5 +38,35 @@ internal class FlowsKtTest {
         }
         assertTrue(execTime > 0.5.seconds)
         assertTrue(execTime < 2.seconds)
+    }
+
+
+    @ExperimentalTime
+    @Test
+    fun testFileChanges() {
+        val tmpFile = File.createTempFile("testFile", "txt").apply {
+            deleteOnExit()
+        }
+        val values = listOf("hello", "world", "exit")
+
+        Assertions.assertThrows(CancellationException::class.java) {
+            runBlocking {
+                launch {
+                    values.forEach {
+                        tmpFile.writeText(it)
+                        delay(0.1.seconds)
+                    }
+                }
+                tmpFile.changesToFlow().collectIndexed { index, value ->
+                    assertEquals(values[index], value)
+                    if ("exit" == value) {
+                        assertEquals(index, 2)
+                        cancel()
+                    }
+                }
+            }
+        }
+
+
     }
 }

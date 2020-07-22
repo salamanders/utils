@@ -1,10 +1,16 @@
 package info.benjaminhill.utils
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import java.io.File
 import java.lang.Runtime.getRuntime
+import java.nio.charset.Charset
+import java.util.concurrent.atomic.AtomicReference
+import kotlin.time.Duration
+import kotlin.time.ExperimentalTime
+import kotlin.time.TimeMark
+import kotlin.time.TimeSource.Monotonic
+import kotlin.time.seconds
 
 /**
  * Map in parallel.
@@ -38,3 +44,36 @@ fun <T, R> Flow<T>.zipWithNext(transform: (a: T, b: T) -> R): Flow<R> = flow {
         last = elt
     }
 }
+
+/**
+ * Actively polls a file for changes,
+ * creating a flow of the contents every time it changes.
+ * Best for one-line status files.
+ */
+@ExperimentalTime
+fun File.changesToFlow(
+    charset: Charset = Charset.defaultCharset(),
+    lastModified: AtomicReference<TimeMark> = AtomicReference(Monotonic.markNow()),
+    slowAfterDuration: Duration = 5.seconds,
+    slowPoll: Duration = 0.5.seconds,
+    fastPoll: Duration = 0.01.seconds
+): Flow<String> = flow {
+    require(exists()) { "File does not exist: '${absolutePath}'" }
+    require(canRead()) { "Can not read file: '${absolutePath}'" }
+
+    while (true) { // Cancellable
+        emit(readText(charset))
+        delay(
+            if (lastModified.get().elapsedNow() > slowAfterDuration) {
+                slowPoll
+            } else {
+                fastPoll
+            }
+        )
+    }
+}
+    .flowOn(Dispatchers.IO) // Run in background
+    .distinctUntilChanged() // no duplicate status
+    .onEach { lastModified.set(Monotonic.markNow()) }
+    .conflate() // Immediately provide most recent
+    .map { it.trim() }
