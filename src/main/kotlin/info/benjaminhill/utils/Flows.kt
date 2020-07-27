@@ -6,8 +6,6 @@ import java.io.File
 import java.lang.Runtime.getRuntime
 import java.nio.charset.Charset
 import java.nio.file.Files
-import java.nio.file.Path
-import java.util.*
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
@@ -66,6 +64,7 @@ fun File.changesToFlow(
     require(canRead()) { "Can not read file: '${absolutePath}'" }
     val filePath = this@changesToFlow.toPath()
 
+    @Suppress("BlockingMethodInNonBlockingContext")
     while (true) { // Cancellable
         emit(Files.readAllBytes(filePath))
         delay(

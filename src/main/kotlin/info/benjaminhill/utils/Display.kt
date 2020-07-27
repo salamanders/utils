@@ -17,9 +17,3 @@ val Double.r: String
         }
     }
 
-/** Print the line if the lineNum is a power of 2.  Good for series that might be big. */
-fun println2(lineNum: Int, log: () -> String) {
-    if ((lineNum and (lineNum - 1)) == 0) {
-        println(log())
-    }
-}
