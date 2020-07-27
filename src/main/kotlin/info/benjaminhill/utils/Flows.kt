@@ -5,6 +5,9 @@ import kotlinx.coroutines.flow.*
 import java.io.File
 import java.lang.Runtime.getRuntime
 import java.nio.charset.Charset
+import java.nio.file.Files
+import java.nio.file.Path
+import java.util.*
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
@@ -58,12 +61,13 @@ fun File.changesToFlow(
     slowAfterDuration: Duration = 5.seconds,
     slowPoll: Duration = 0.5.seconds,
     fastPoll: Duration = 0.01.seconds
-): Flow<String> = flow {
+): Flow<String> = flow<ByteArray> {
     require(exists()) { "File does not exist: '${absolutePath}'" }
     require(canRead()) { "Can not read file: '${absolutePath}'" }
+    val filePath = this@changesToFlow.toPath()
 
     while (true) { // Cancellable
-        emit(readText(charset))
+        emit(Files.readAllBytes(filePath))
         delay(
             if (lastModified.get().elapsedNow() > slowAfterDuration) {
                 slowPoll
@@ -74,7 +78,7 @@ fun File.changesToFlow(
     }
 }
     .flowOn(Dispatchers.IO) // Run in background
-    .distinctUntilChanged() // no duplicate status
+    .distinctUntilChanged { old, new -> old.contentEquals(new) } // no duplicate status
     .onEach { lastModified.set(Monotonic.markNow()) }
     .conflate() // Immediately provide most recent
-    .map { it.trim() }
+    .map { String(it, charset).trim() }

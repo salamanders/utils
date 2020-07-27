@@ -47,7 +47,7 @@ internal class FlowsKtTest {
         val tmpFile = File.createTempFile("testFile", "txt").apply {
             deleteOnExit()
         }
-        val values = listOf("hello", "world", "exit")
+        val values = listOf("hello", "world", "world", "exit")
 
         Assertions.assertThrows(CancellationException::class.java) {
             runBlocking {
@@ -57,10 +57,15 @@ internal class FlowsKtTest {
                         delay(0.1.seconds)
                     }
                 }
-                tmpFile.changesToFlow().collectIndexed { index, value ->
-                    assertEquals(values[index], value)
+                tmpFile
+                    .changesToFlow()
+                    .collectIndexed { index, value ->
+                       when(index) {
+                           0->assertEquals("hello", value)
+                           1->assertEquals("world", value)
+                           2->assertEquals("exit", value)
+                       }
                     if ("exit" == value) {
-                        assertEquals(index, 2)
                         cancel()
                     }
                 }
