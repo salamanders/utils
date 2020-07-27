@@ -49,6 +49,7 @@ fun <T, R> Flow<T>.zipWithNext(transform: (a: T, b: T) -> R): Flow<R> = flow {
  * Actively polls a file for changes,
  * creating a flow of the contents every time it changes.
  * Best for one-line status files.
+ * TODO: Refactor into a StateFlow
  */
 @ExperimentalTime
 fun File.changesToFlow(
