@@ -3,15 +3,14 @@ package info.benjaminhill.utils
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import java.io.File
+import java.io.RandomAccessFile
 import java.lang.Runtime.getRuntime
 import java.nio.charset.Charset
-import java.nio.file.Files
 import java.util.concurrent.atomic.AtomicReference
-import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 import kotlin.time.TimeMark
 import kotlin.time.TimeSource.Monotonic
-import kotlin.time.seconds
+
 
 /**
  * Map in parallel.
@@ -56,28 +55,29 @@ fun <T, R> Flow<T>.zipWithNext(transform: (a: T, b: T) -> R): Flow<R> = flow {
 fun File.changesToFlow(
     charset: Charset = Charset.defaultCharset(),
     lastModified: AtomicReference<TimeMark> = AtomicReference(Monotonic.markNow()),
-    slowAfterDuration: Duration = 5.seconds,
-    slowPoll: Duration = 0.5.seconds,
-    fastPoll: Duration = 0.01.seconds
-): Flow<String> = flow<ByteArray> {
-    require(exists()) { "File does not exist: '${absolutePath}'" }
-    require(canRead()) { "Can not read file: '${absolutePath}'" }
-    val filePath = this@changesToFlow.toPath()
+): Flow<String> = flow {
+    val contents = ByteArray(this@changesToFlow.length().coerceAtLeast(1_024).toInt())
+    var position: Int
+    var bytesRead: Int
 
     @Suppress("BlockingMethodInNonBlockingContext")
-    while (true) { // Cancellable
-        emit(Files.readAllBytes(filePath))
-        delay(
-            if (lastModified.get().elapsedNow() > slowAfterDuration) {
-                slowPoll
-            } else {
-                fastPoll
-            }
-        )
+    RandomAccessFile(this@changesToFlow, "r").use { raf ->
+        while (true) {
+            position = 0
+            raf.seek(0)
+            do {
+                bytesRead = raf.read(contents, position, contents.size - position)
+                if (bytesRead > 0) {
+                    position += bytesRead
+                }
+            } while (bytesRead != -1 && position < contents.size)
+            emit(contents.copyOfRange(0, position))
+            delay((lastModified.get().elapsedNow().inMilliseconds.toLong() / 20).coerceIn(1L..500L))
+        }
     }
 }
     .flowOn(Dispatchers.IO) // Run in background
     .distinctUntilChanged { old, new -> old.contentEquals(new) } // no duplicate status
-    .onEach { lastModified.set(Monotonic.markNow()) }
+    .onEach { lastModified.set(Monotonic.markNow()) } // reset the delay timer
     .conflate() // Immediately provide most recent
     .map { String(it, charset).trim() }
