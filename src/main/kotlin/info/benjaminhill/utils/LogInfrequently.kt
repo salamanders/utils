@@ -13,21 +13,25 @@ private val logger = KotlinLogging.logger {}
  * Spit out `private val logger = KotlinLogging.logger {}` `logger.info` log lines every few seconds
  */
 class LogInfrequently @ExperimentalTime constructor(
-    private val delay: Duration = 10.seconds,
-    private val logLine: (perSec: Double) -> String = { perSec: Double -> "Running at ${perSec.r}/sec" }
+    private val delay: Duration = 10.seconds
 ) {
     @ExperimentalTime
     private var startTimeNs = System.nanoTime().nanoseconds
     private var hitCount = AtomicLong()
 
+    /**
+     * Call with `linf.hit() { "Optional custom line to log" }`
+     */
     @ExperimentalTime
-    fun hit() {
+    fun hit(
+        logLine: () -> String = {
+            "Running at ${(hitCount.toDouble() / (System.nanoTime().nanoseconds - startTimeNs).inSeconds).r}/sec"
+        }
+    ) {
         hitCount.incrementAndGet()
         System.nanoTime().nanoseconds.let { now ->
             if (now - startTimeNs > delay) {
-                val elapsedTime = now - startTimeNs
-                val hitPerSecond = hitCount.toDouble() / elapsedTime.inSeconds
-                logger.info { logLine(hitPerSecond) }
+                logger.info { logLine() }
                 hitCount.set(0)
                 startTimeNs = now
             }
