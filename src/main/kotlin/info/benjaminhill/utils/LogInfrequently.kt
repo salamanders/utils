@@ -20,6 +20,7 @@ class LogInfrequently @ExperimentalTime constructor(
     private var hitCount = AtomicLong()
 
     /**
+     * If more than delay, logs line to logger.info
      * Call with `linf.hit() { "Optional custom line to log" }`
      */
     @ExperimentalTime
