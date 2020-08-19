@@ -1,6 +1,6 @@
 package info.benjaminhill.utils
 
-import mu.KotlinLogging
+import org.apache.logging.log4j.kotlin.Logging
 import java.io.File
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
@@ -11,8 +11,6 @@ import java.util.concurrent.atomic.AtomicReference
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 import kotlin.time.*
-
-private val logger = KotlinLogging.logger {}
 
 /**
  * To cache a lot of small function calls to disk.
@@ -44,7 +42,7 @@ class SimpleCache<K : Serializable, V : Serializable>(
     fun persist() {
         ObjectOutputStream(GZIPOutputStream(cacheFile.outputStream())).use {
             it.writeObject(cache)
-            logger.debug { "SimpleCache auto-persisted ${cache.size}" }
+            logger.debug { "SimpleCache persisted ${cache.size}" }
         }
         mutationCount.set(0)
         lastPersisted.set(TimeSource.Monotonic.markNow())
@@ -54,7 +52,7 @@ class SimpleCache<K : Serializable, V : Serializable>(
         get() = cache.size
 
     /**
-     * Call with typical map format: `myCache[a] = b`
+     * Call with typical map format: `myCache[\theKey] = b`
      */
     operator fun set(key: K, value: V) {
         this.cache[key] = value
@@ -62,6 +60,7 @@ class SimpleCache<K : Serializable, V : Serializable>(
             mutationCount.incrementAndGet() >= persistEveryWrites ||
             lastPersisted.get().elapsedNow() >= persistEveryDuration
         ) {
+            logger.debug { "SimpleCache auto-persisting" }
             persist()
         }
     }
@@ -69,8 +68,8 @@ class SimpleCache<K : Serializable, V : Serializable>(
     operator fun get(key: K) = this.cache[key]
 
     /** Load a cached object if available, calculate and cache if not.
-     * Call using myCache(a) { b }*/
-    operator fun invoke(key: K, exec: () -> V): V {
+     * Call using myCache(theKey) { ...lambda function resulting in value... }*/
+    suspend operator fun invoke(key: K, exec: suspend () -> V): V {
         if (!cache.containsKey(key)) {
             set(key, exec())
             logger.trace { "SimpleCache miss on '$key'" }
@@ -79,4 +78,6 @@ class SimpleCache<K : Serializable, V : Serializable>(
         }
         return cache[key]!!
     }
+
+    companion object : Logging
 }

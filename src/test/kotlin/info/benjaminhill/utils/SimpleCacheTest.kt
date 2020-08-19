@@ -1,5 +1,6 @@
 package info.benjaminhill.utils
 
+import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.nio.file.Files
@@ -43,12 +44,12 @@ internal class SimpleCacheTest {
         sc["b"] = 3
 
         val aint = AtomicInteger()
-        val c1 = sc("c") { aint.incrementAndGet() }
-        assertEquals(1, c1)
-        val c2 = sc("c") { aint.incrementAndGet() }
-        assertEquals(1, c2)
-        assertEquals(1, aint.get())
-
-
+        runBlocking {
+            val c1 = sc("c") { aint.incrementAndGet() }
+            assertEquals(1, c1)
+            val c2 = sc("c") { aint.incrementAndGet() }
+            assertEquals(1, c2)
+            assertEquals(1, aint.get())
+        }
     }
 }

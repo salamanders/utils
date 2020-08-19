@@ -4,14 +4,12 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
-import mu.KotlinLogging
+import org.apache.logging.log4j.kotlin.Logging
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import kotlin.time.ExperimentalTime
 import kotlin.time.seconds
-
-private val logger = KotlinLogging.logger {}
 
 internal class CommandsKtTest {
 
@@ -38,4 +36,6 @@ internal class CommandsKtTest {
             }
         }
     }
+
+    companion object : Logging
 }

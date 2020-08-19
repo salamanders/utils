@@ -13,8 +13,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <kotlin.version>1.4.0-rc</kotlin.version>
-        <kotlin.coroutine.version>1.3.8-1.4.0-rc</kotlin.coroutine.version>
+        <kotlin.version>1.4.0</kotlin.version>
+        <kotlin.coroutine.version>1.3.9</kotlin.coroutine.version>
         <kotlin.code.style>official</kotlin.code.style>
 
         <maven.compiler.source>11</maven.compiler.source>
@@ -36,6 +36,11 @@
             <id>bintray-kotlin-kotlinx</id>
             <name>bintray</name>
             <url>https://kotlin.bintray.com/kotlinx</url>
+        </repository>
+
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
         </repository>
     </repositories>
 
@@ -82,22 +87,18 @@
             <version>${kotlin.coroutine.version}</version>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/io.github.microutils/kotlin-logging -->
+        <!-- Logging -->
         <dependency>
-            <groupId>io.github.microutils</groupId>
-            <artifactId>kotlin-logging</artifactId>
-            <version>1.8.3</version>
+            <groupId>com.github.apache</groupId>
+            <artifactId>logging-log4j-kotlin</artifactId>
+            <version>28071ae11f</version>
         </dependency>
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.30</version>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>2.13.3</version>
         </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>1.7.30</version>
-        </dependency>
+
 
         <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
         <dependency>
