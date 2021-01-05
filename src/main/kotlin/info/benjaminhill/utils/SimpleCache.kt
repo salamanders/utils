@@ -18,7 +18,7 @@ import kotlin.time.*
  */
 @ExperimentalTime
 class SimpleCache<K : Serializable, V : Serializable>(
-    private val cacheFile: File = File("simplecache.ser.gz"),
+    private val cacheFile: File = File("simpleCache.ser.gz"),
     private val persistEveryWrites: Int = 1_000,
     private val persistEveryDuration: Duration = 3.minutes
 ) {

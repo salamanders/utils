@@ -1,7 +1,6 @@
 package info.benjaminhill.utils
 
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.apache.logging.log4j.kotlin.Logging
@@ -13,7 +12,6 @@ import kotlin.time.seconds
 
 internal class CommandsKtTest {
 
-    @ExperimentalCoroutinesApi
     @ExperimentalTime
     @Test
     fun testRunCommand() {

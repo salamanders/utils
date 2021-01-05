@@ -39,7 +39,7 @@ internal class FlowsKtTest {
 
     @ExperimentalTime
     @Test
-    fun testFileChanges(): Unit {
+    fun testFileChanges() {
         var maxSeen = 0
         val tmpFile = File.createTempFile("testFile2", "txt").apply {
             deleteOnExit()

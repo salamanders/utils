@@ -12,7 +12,6 @@ import kotlin.time.*
  * @return All of the results and errors as a single flow.  Caller must filter for the desired line in the results.
  */
 @ExperimentalTime
-@ExperimentalCoroutinesApi
 suspend fun runCommand(
     command: Array<String>,
     workingDir: File = File("."),

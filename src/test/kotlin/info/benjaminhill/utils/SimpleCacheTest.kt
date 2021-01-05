@@ -43,13 +43,13 @@ internal class SimpleCacheTest {
         sc["a"] = 1
         sc["b"] = 3
 
-        val aint = AtomicInteger()
+        val counter = AtomicInteger()
         runBlocking {
-            val c1 = sc("c") { aint.incrementAndGet() }
+            val c1 = sc("c") { counter.incrementAndGet() }
             assertEquals(1, c1)
-            val c2 = sc("c") { aint.incrementAndGet() }
+            val c2 = sc("c") { counter.incrementAndGet() }
             assertEquals(1, c2)
-            assertEquals(1, aint.get())
+            assertEquals(1, counter.get())
         }
     }
 }
