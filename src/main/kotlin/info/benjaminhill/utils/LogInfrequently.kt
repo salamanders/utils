@@ -13,7 +13,8 @@ import kotlin.time.seconds
  * Spit out `private val logger = KotlinLogging.logger {}` `logger.info` log lines every few seconds
  */
 class LogInfrequently @ExperimentalTime constructor(
-    private val delay: Duration = 10.seconds
+    private val delay: Duration = 10.seconds,
+    private val logLine: (perSec: Double) -> String = { perSec: Double -> "Running at ${perSec.r}/sec" }
 ) {
     @ExperimentalTime
     private var startTime = TimeSource.Monotonic.markNow()
@@ -21,18 +22,13 @@ class LogInfrequently @ExperimentalTime constructor(
 
     /**
      * If more than delay, logs line to logger.info
-     * Call with `linf.hit() { "Optional custom line to log" }`
      */
     @ExperimentalTime
-    fun hit(
-        logLine: () -> String = {
-            "Running at ${(hitCount.toDouble() / startTime.elapsedNow().inSeconds).r}/sec"
-        }
-    ) {
+    fun hit() {
         hitCount.incrementAndGet()
 
         if (startTime.elapsedNow() > delay) {
-            logger.info { logLine() }
+            logger.info { logLine(hitCount.toDouble() / startTime.elapsedNow().inSeconds) }
             hitCount.set(0)
             startTime = TimeSource.Monotonic.markNow()
         }
