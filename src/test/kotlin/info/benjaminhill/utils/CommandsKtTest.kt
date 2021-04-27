@@ -3,12 +3,11 @@ package info.benjaminhill.utils
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
-import org.apache.logging.log4j.kotlin.Logging
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
+import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
-import kotlin.time.seconds
 
 internal class CommandsKtTest {
 
@@ -28,12 +27,10 @@ internal class CommandsKtTest {
                 runBlocking {
                     runCommand(
                         command = arrayOf("sleep", "3"),
-                        maxDuration = 1.seconds
+                        maxDuration = Duration.seconds(1)
                     ).toList()
                 }
             }
         }
     }
-
-    companion object : Logging
 }

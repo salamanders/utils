@@ -7,6 +7,7 @@ import java.io.RandomAccessFile
 import java.lang.Runtime.getRuntime
 import java.nio.charset.Charset
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.time.DurationUnit
 import kotlin.time.ExperimentalTime
 import kotlin.time.TimeMark
 import kotlin.time.TimeSource.Monotonic
@@ -72,7 +73,9 @@ fun File.changesToFlow(
                 }
             } while (bytesRead != -1 && position < contents.size)
             emit(contents.copyOfRange(0, position))
-            delay((lastModified.get().elapsedNow().inMilliseconds.toLong() / 20).coerceIn(1L..500L))
+            delay(
+                (lastModified.get().elapsedNow().toDouble(DurationUnit.MILLISECONDS).toLong() / 20).coerceIn(1L..500L)
+            )
         }
     }
 }

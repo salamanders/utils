@@ -6,16 +6,16 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.io.File
+import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
-import kotlin.time.seconds
 
 internal class FlowsKtTest {
     companion object {
         @ExperimentalTime
         private val slowProcess = { a: Int ->
             runBlocking {
-                delay(1.seconds)
+                delay(Duration.seconds(1))
                 a * 2
             }
         }
@@ -32,8 +32,8 @@ internal class FlowsKtTest {
                 assertEquals(listOf(2, 4, 6, 8, 10), endVals)
             }
         }
-        assertTrue(execTime > 0.5.seconds)
-        assertTrue(execTime < 2.seconds)
+        assertTrue(execTime > Duration.seconds(0.5))
+        assertTrue(execTime < Duration.seconds(2))
     }
 
 
@@ -50,7 +50,7 @@ internal class FlowsKtTest {
         runBlocking(Dispatchers.IO) {
             launch {
                 values.forEach {
-                    delay(0.1.seconds)
+                    delay(Duration.seconds(0.1))
                     tmpFile.writeText(it)
                 }
             }

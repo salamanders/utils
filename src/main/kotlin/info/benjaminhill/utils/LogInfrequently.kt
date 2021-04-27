@@ -1,19 +1,19 @@
 package info.benjaminhill.utils
 
-import org.apache.logging.log4j.kotlin.Logging
-import org.apache.logging.log4j.kotlin.logger
+import mu.KotlinLogging
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.time.Duration
+import kotlin.time.DurationUnit
 import kotlin.time.ExperimentalTime
 import kotlin.time.TimeSource
-import kotlin.time.seconds
 
+val logger = KotlinLogging.logger {}
 
 /**
  * Spit out `private val logger = KotlinLogging.logger {}` `logger.info` log lines every few seconds
  */
 class LogInfrequently @ExperimentalTime constructor(
-    private val delay: Duration = 10.seconds
+    private val delay: Duration = Duration.seconds(10)
 ) {
     @ExperimentalTime
     private var startTime = TimeSource.Monotonic.markNow()
@@ -26,7 +26,7 @@ class LogInfrequently @ExperimentalTime constructor(
     @ExperimentalTime
     fun hit(
         logLine: () -> String = {
-            "Running at ${(hitCount.toDouble() / startTime.elapsedNow().inSeconds).r}/sec"
+            "Running at ${(hitCount.toDouble() / startTime.elapsedNow().toDouble(DurationUnit.SECONDS)).r}/sec"
         }
     ) {
         hitCount.incrementAndGet()
@@ -37,11 +37,7 @@ class LogInfrequently @ExperimentalTime constructor(
             startTime = TimeSource.Monotonic.markNow()
         }
     }
-
-    companion object : Logging
 }
-
-val logger by lazy { logger("logexp") }
 
 /** Print the line if the lineNum is a power of 2.  Good for series that might be big. */
 inline fun logexp(lineNum: Int, crossinline log: () -> String) {

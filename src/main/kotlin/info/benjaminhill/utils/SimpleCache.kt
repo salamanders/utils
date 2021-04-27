@@ -1,6 +1,5 @@
 package info.benjaminhill.utils
 
-import org.apache.logging.log4j.kotlin.Logging
 import java.io.File
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
@@ -10,7 +9,10 @@ import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
-import kotlin.time.*
+import kotlin.time.Duration
+import kotlin.time.ExperimentalTime
+import kotlin.time.TimeMark
+import kotlin.time.TimeSource
 
 /**
  * To cache a lot of small function calls to disk.
@@ -20,7 +22,7 @@ import kotlin.time.*
 class SimpleCache<K : Serializable, V : Serializable>(
     private val cacheFile: File = File("simpleCache.ser.gz"),
     private val persistEveryWrites: Int = 1_000,
-    private val persistEveryDuration: Duration = 3.minutes
+    private val persistEveryDuration: Duration = Duration.minutes(3)
 ) {
     private val cache: MutableMap<K, V> = ConcurrentHashMap()
     private val mutationCount: AtomicLong = AtomicLong()
@@ -78,6 +80,4 @@ class SimpleCache<K : Serializable, V : Serializable>(
         }
         return cache[key]!!
     }
-
-    companion object : Logging
 }
