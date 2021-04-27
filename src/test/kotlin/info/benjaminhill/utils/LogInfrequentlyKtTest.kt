@@ -11,7 +11,7 @@ internal class LogInfrequentlyKtTest {
     @Test
     fun logInfreq() {
         val linf = LogInfrequently()
-        repeat(20) { i ->
+        repeat(20) {
             linf.hit()
         }
     }
