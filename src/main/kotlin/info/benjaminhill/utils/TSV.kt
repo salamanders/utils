@@ -8,16 +8,16 @@ import java.util.concurrent.ConcurrentSkipListSet
 private val alreadySeen: MutableSet<String> = ConcurrentSkipListSet()
 
 /** Keys = only the strings, print each line at most once */
-fun printlntOnce(vararg elements: Any?) = printlntOnceFull(true, elements)
+fun printlntOnce(vararg elements: Any?) = printlntOnceFull(true, *elements)
 
-fun printlntOnceSkip(vararg elements: Any?) = printlntOnceFull(false, elements)
+fun printlntOnceSkip(vararg elements: Any?) = printlntOnceFull(false, *elements)
 
 private fun printlntOnceFull(display: Boolean = true, vararg elements: Any?) {
     if (elements.isEmpty()) {
         return
     }
     val key = elements.filterIsInstance<String>().joinToString(",")
-    require(key.isNotBlank()) { "Bad key for printtsvOnce, need at least 1 String" }
+    require(key.isNotBlank()) { "Bad key for printtsvOnce, need at least 1 String: `${elements.joinToString { it?.javaClass?.kotlin?.toString() ?: "" }}`" }
 
     if (alreadySeen.add(key)) {
         if (display) {
