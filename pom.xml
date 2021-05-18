@@ -14,7 +14,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <kotlin.version>1.5.0</kotlin.version>
-        <kotlin.coroutine.version>1.5.0-RC</kotlin.coroutine.version>
+        <kotlin.coroutine.version>1.5.0</kotlin.coroutine.version>
         <kotlin.code.style>official</kotlin.code.style>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
