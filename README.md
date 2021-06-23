@@ -1,6 +1,6 @@
 # utils
 
-Grab-bag of Kotlin 1.4 Utilities
+Grab-bag of Kotlin 1.5 Utilities
 
 pom.xml:
 

@@ -4,11 +4,11 @@ import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 
 /**
- * "[[hh:]mm:]ss]" to Duration
+ * "[[[hh:]mm:]ss]" to Duration
  */
 @ExperimentalTime
-fun Duration.Companion.hms(str: String): Duration {
-    val parts = str.split(":").reversed()
+fun Duration.Companion.hms(value: String): Duration {
+    val parts = value.split(":").reversed()
     var result = seconds(0)
     if (parts.isNotEmpty()) {
         result += seconds(parts[0].toLong())
