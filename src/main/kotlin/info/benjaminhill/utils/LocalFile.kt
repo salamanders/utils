@@ -19,7 +19,7 @@ fun getFile(path: String): File {
             File(System.getProperty("user.dir"), path),
             (object {}.javaClass.getResource(path))?.let { File(it.toURI()) }
         ).first { it.exists() }
-    } catch (e:NoSuchElementException) {
+    } catch (e: NoSuchElementException) {
         throw FileNotFoundException("Unable to find file: '$path'")
     }
 }
