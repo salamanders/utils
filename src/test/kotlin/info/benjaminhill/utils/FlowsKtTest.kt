@@ -26,7 +26,7 @@ internal class FlowsKtTest {
     fun testPMap() {
         val execTime = measureTime {
             runBlocking {
-                val endVals = (1..5).toList().asFlow().pMap(concurrencyLevel = 6) { _, startVal: Int ->
+                val endVals = (1..5).toList().asFlow().mapConcurrently { startVal: Int ->
                     slowProcess(startVal)
                 }.toList()
                 assertEquals(listOf(2, 4, 6, 8, 10), endVals)
