@@ -9,10 +9,10 @@ internal class UrlsKtTest {
 
     @Test
     fun getToObject() {
-        val result = URL("http://echo.jsontest.com/key/2/one/two")
+        val result = URL("https://filesamples.com/samples/code/json/sample1.json")
             .getToObject(TestResult::class.java)
-        assertEquals("two", result.one)
-        assertEquals(2, result.key)
+        assertEquals("Apple", result.fruit)
+        assertEquals("Large", result.size)
         assertNull(result.notHere)
     }
 
@@ -21,8 +21,8 @@ internal class UrlsKtTest {
     )
 
     data class TestResult(
-        val one: String,
-        val key: Int,
+        val fruit: String,
+        val size: String,
         val notHere: List<MissingStuff>?
     )
 }
