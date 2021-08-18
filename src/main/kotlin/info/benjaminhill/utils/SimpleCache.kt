@@ -33,7 +33,7 @@ class SimpleCache<K : Serializable, V : Serializable>(
             ObjectInputStream(GZIPInputStream(cacheFile.inputStream())).use { inputStream ->
                 @Suppress("UNCHECKED_CAST")
                 cache.putAll(inputStream.readObject() as Map<K, V>)
-                logger.debug { "SimpleCache startup loaded ${cache.size}" }
+                LOG.debug { "SimpleCache startup loaded ${cache.size}" }
             }
         }
     }
@@ -44,7 +44,7 @@ class SimpleCache<K : Serializable, V : Serializable>(
     fun persist() {
         ObjectOutputStream(GZIPOutputStream(cacheFile.outputStream())).use {
             it.writeObject(cache)
-            logger.debug { "SimpleCache persisted ${cache.size}" }
+            LOG.debug { "SimpleCache persisted ${cache.size}" }
         }
         mutationCount.set(0)
         lastPersisted.set(TimeSource.Monotonic.markNow())
@@ -62,7 +62,7 @@ class SimpleCache<K : Serializable, V : Serializable>(
             mutationCount.incrementAndGet() >= persistEveryWrites ||
             lastPersisted.get().elapsedNow() >= persistEveryDuration
         ) {
-            logger.debug { "SimpleCache auto-persisting" }
+            LOG.debug { "SimpleCache auto-persisting" }
             persist()
         }
     }
@@ -74,9 +74,9 @@ class SimpleCache<K : Serializable, V : Serializable>(
     suspend operator fun invoke(key: K, exec: suspend () -> V): V {
         if (!cache.containsKey(key)) {
             set(key, exec())
-            logger.trace { "SimpleCache miss on '$key'" }
+            LOG.trace { "SimpleCache miss on '$key'" }
         } else {
-            logger.trace { "SimpleCache hit on '$key'" }
+            LOG.trace { "SimpleCache hit on '$key'" }
         }
         return cache[key]!!
     }

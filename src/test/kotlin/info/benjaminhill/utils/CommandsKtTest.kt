@@ -14,7 +14,7 @@ internal class CommandsKtTest {
     @ExperimentalTime
     @Test
     fun testRunCommand() {
-        logger.info { "testRunCommand" }
+        LOG.info { "testRunCommand" }
 
         runBlocking {
             val outputs = runCommand(arrayOf("echo", "hi there")).toList()

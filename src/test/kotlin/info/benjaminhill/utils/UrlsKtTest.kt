@@ -16,6 +16,13 @@ internal class UrlsKtTest {
         assertNull(result.notHere)
     }
 
+    @Test
+    fun delete() {
+        // Hope they don't let me delete this!
+        val result = URL("https://filesamples.com/samples/code/json/sample1.json").delete()
+        assertEquals(405, result)
+    }
+
     data class MissingStuff(
         val name: String
     )
