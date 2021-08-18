@@ -1,7 +1,6 @@
 package info.benjaminhill.utils
 
 import java.io.IOException
-import java.math.BigDecimal
 import java.math.RoundingMode
 
 fun Double.round(scale: Int = 1) = this.toBigDecimal().setScale(scale, RoundingMode.HALF_EVEN).toDouble()
