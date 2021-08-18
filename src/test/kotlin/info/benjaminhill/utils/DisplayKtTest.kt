@@ -18,4 +18,14 @@ internal class DisplayKtTest {
         assertEquals(" 0.0", (-0.00009f).r)
         assertEquals("-5.0", (-5.0f).r)
     }
+
+@Test
+fun testDeepStackTrace() {
+    try {
+        val foo = listOf<List<String>>()
+        foo.first()
+    } catch (e: NoSuchElementException) {
+        e.printDeepStackTrace()
+    }
+}
 }

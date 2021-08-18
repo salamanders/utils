@@ -11,7 +11,7 @@ import kotlin.time.toJavaDuration
 
 /**
  * @param command All command "parts".  Things with spaces (like a file path) should not be escaped or quoted, but should be a single arg
- * @return All of the results and errors as a single flow.  Caller must filter for the desired line in the results.
+ * @return All the results and errors as a single flow.  Caller must filter for the desired line in the results.
  */
 @ExperimentalTime
 suspend fun runCommand(
