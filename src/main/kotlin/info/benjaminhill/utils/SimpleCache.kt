@@ -39,7 +39,7 @@ class SimpleCache<K : Serializable, V : Serializable>(
     }
 
     /**
-     * Ok to call manually, but better practice to let the parameters do the persisting.
+     * Ok to call manually, but better practice letting the parameters do the persisting.
      */
     fun persist() {
         ObjectOutputStream(GZIPOutputStream(cacheFile.outputStream())).use {

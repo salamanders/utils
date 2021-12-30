@@ -2,8 +2,7 @@ package info.benjaminhill.utils
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.io.File
 import kotlin.time.Duration
@@ -18,6 +17,14 @@ internal class FlowsKtTest {
                 delay(Duration.seconds(1))
                 a * 2
             }
+        }
+    }
+
+    @Test
+    fun textZipWithNext() {
+        runBlocking {
+            val endVals: List<Int> = (1..5).toList().asFlow().zipWithNext { a, b -> a * 100 + b }.toList()
+            assertArrayEquals(intArrayOf(102, 203, 304, 405), endVals.toIntArray())
         }
     }
 

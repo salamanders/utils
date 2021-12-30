@@ -14,7 +14,7 @@ internal class DisplayKtTest {
 
     @Test
     fun testGetRF() {
-        assertEquals(" 123.457", 123.456789f.r)
+        assertEquals(" 123.457", 123.45678f.r)
         assertEquals(" 0.0", (-0.00009f).r)
         assertEquals("-5.0", (-5.0f).r)
     }
@@ -25,6 +25,7 @@ internal class DisplayKtTest {
             val foo = listOf<List<String>>()
             foo.first()
         } catch (e: NoSuchElementException) {
+            println("Intentional print:")
             e.printDeepStackTrace()
         }
     }
