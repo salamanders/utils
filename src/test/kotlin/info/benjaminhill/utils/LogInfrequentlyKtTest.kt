@@ -3,11 +3,9 @@ package info.benjaminhill.utils
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.concurrent.atomic.AtomicInteger
-import kotlin.time.ExperimentalTime
 
 internal class LogInfrequentlyKtTest {
 
-    @ExperimentalTime
     @Test
     fun logInfreq() {
         val linf = LogInfrequently()

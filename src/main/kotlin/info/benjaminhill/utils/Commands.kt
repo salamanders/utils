@@ -5,19 +5,18 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.time.withTimeout
 import java.io.File
 import kotlin.time.Duration
-import kotlin.time.ExperimentalTime
+import kotlin.time.Duration.Companion.nanoseconds
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.toJavaDuration
-
 
 /**
  * @param command All command "parts".  Things with spaces (like a file path) should not be escaped or quoted, but should be a single arg
  * @return All the results and errors as a single flow.  Caller must filter for the desired line in the results.
  */
-@ExperimentalTime
 suspend fun runCommand(
     command: Array<String>,
     workingDir: File = File("."),
-    maxDuration: Duration = Duration.seconds(5)
+    maxDuration: Duration = 5.seconds
 ): Flow<String> = withTimeout(duration = maxDuration.toJavaDuration()) {
     val timeChecker: Job
     ProcessBuilder()
@@ -27,10 +26,10 @@ suspend fun runCommand(
         .start()!!.also { process ->
             // Because you can't expect newlines to happen if the process locked up.
             timeChecker = launch {
-                val startTime = Duration.nanoseconds(System.nanoTime())
+                val startTime = System.nanoTime().nanoseconds
                 val sleepDuration = maxDuration / 20
                 while (process.isAlive) {
-                    if (Duration.nanoseconds(System.nanoTime()) - startTime > maxDuration) {
+                    if (System.nanoTime().nanoseconds - startTime > maxDuration) {
                         process.destroyForcibly()
                         throw CancellationException("Ran over time: $maxDuration")
                     }

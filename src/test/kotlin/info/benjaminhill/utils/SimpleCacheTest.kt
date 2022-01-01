@@ -5,9 +5,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.nio.file.Files
 import java.util.concurrent.atomic.AtomicInteger
-import kotlin.time.ExperimentalTime
 
-@ExperimentalTime
 internal class SimpleCacheTest {
 
 

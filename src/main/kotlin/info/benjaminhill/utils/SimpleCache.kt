@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicReference
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 import kotlin.time.Duration
-import kotlin.time.ExperimentalTime
+import kotlin.time.Duration.Companion.minutes
 import kotlin.time.TimeMark
 import kotlin.time.TimeSource
 
@@ -18,11 +18,10 @@ import kotlin.time.TimeSource
  * To cache a lot of small function calls to disk.
  * Only one app can use it at a time.
  */
-@ExperimentalTime
 class SimpleCache<K : Serializable, V : Serializable>(
     private val cacheFile: File = File("simpleCache.ser.gz"),
     private val persistEveryWrites: Int = 1_000,
-    private val persistEveryDuration: Duration = Duration.minutes(3)
+    private val persistEveryDuration: Duration = 3.minutes
 ) {
     private val cache: MutableMap<K, V> = ConcurrentHashMap()
     private val mutationCount: AtomicLong = AtomicLong()

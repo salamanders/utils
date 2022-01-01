@@ -5,16 +5,14 @@ import kotlinx.coroutines.flow.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.io.File
-import kotlin.time.Duration
-import kotlin.time.ExperimentalTime
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.measureTime
 
 internal class FlowsKtTest {
     companion object {
-        @ExperimentalTime
         private val slowProcess = { a: Int ->
             runBlocking {
-                delay(Duration.seconds(1))
+                delay(1.seconds)
                 a * 2
             }
         }
@@ -28,7 +26,6 @@ internal class FlowsKtTest {
         }
     }
 
-    @ExperimentalTime
     @Test
     fun testPMap() {
         val execTime = measureTime {
@@ -39,12 +36,10 @@ internal class FlowsKtTest {
                 assertEquals(listOf(2, 4, 6, 8, 10), endVals)
             }
         }
-        assertTrue(execTime > Duration.seconds(0.5))
-        assertTrue(execTime < Duration.seconds(2))
+        assertTrue(execTime > 0.5.seconds)
+        assertTrue(execTime < 2.seconds)
     }
 
-
-    @ExperimentalTime
     @Test
     fun testFileChanges() {
         var maxSeen = 0
@@ -57,7 +52,7 @@ internal class FlowsKtTest {
         runBlocking(Dispatchers.IO) {
             launch {
                 values.forEach {
-                    delay(Duration.seconds(0.1))
+                    delay(0.1.seconds)
                     tmpFile.writeText(it)
                 }
             }

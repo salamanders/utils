@@ -1,23 +1,26 @@
 package info.benjaminhill.utils
 
 import kotlin.time.Duration
-import kotlin.time.ExperimentalTime
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * "[[[hh:]mm:]ss]" to Duration
  */
-@ExperimentalTime
-fun Duration.Companion.hms(value: String): Duration {
-    val parts = value.split(":").reversed()
-    var result = seconds(0)
-    if (parts.isNotEmpty()) {
-        result += seconds(parts[0].toLong())
+inline val String.hms: Duration
+    get(): Duration {
+        val parts: List<String> = this.split(":").reversed()
+        var totalDuration = 0.seconds
+        if (parts.isNotEmpty() && parts[0].isNotBlank()) {
+            totalDuration += parts[0].toLong().seconds
+        }
+        if (parts.size > 1 && parts[1].isNotBlank()) {
+            totalDuration += parts[1].toLong().minutes
+        }
+        if (parts.size > 2 && parts[2].isNotBlank()) {
+            totalDuration += parts[2].toLong().hours
+        }
+        return totalDuration
     }
-    if (parts.size > 1) {
-        result += minutes(parts[1].toLong())
-    }
-    if (parts.size > 2) {
-        result += hours(parts[2].toLong())
-    }
-    return result
-}
+

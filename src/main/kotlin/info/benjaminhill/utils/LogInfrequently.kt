@@ -3,8 +3,8 @@ package info.benjaminhill.utils
 import mu.KotlinLogging
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.DurationUnit
-import kotlin.time.ExperimentalTime
 import kotlin.time.TimeSource
 
 val LOG = KotlinLogging.logger {}
@@ -12,18 +12,16 @@ val LOG = KotlinLogging.logger {}
 /**
  * Spit out `private val logger = KotlinLogging.logger {}` `logger.info` log lines every few seconds
  */
-class LogInfrequently @ExperimentalTime constructor(
-    private val delay: Duration = Duration.seconds(10),
+class LogInfrequently constructor(
+    private val delay: Duration = 10.seconds,
     private val logLine: (perSec: Double) -> String = { perSec: Double -> "Running at ${perSec.r}/sec" }
 ) {
-    @ExperimentalTime
     private var startTime = TimeSource.Monotonic.markNow()
     private var hitCount = AtomicLong()
 
     /**
      * If more than delay, logs line to logger.info
      */
-    @ExperimentalTime
     fun hit() {
         hitCount.incrementAndGet()
         if (startTime.elapsedNow() > delay) {

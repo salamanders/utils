@@ -138,10 +138,7 @@
                 <configuration>
                     <args>
                         <arg>-Xinline-classes</arg>
-                        <arg>-Xopt-in=kotlin.time.ExperimentalTime</arg>
                         <arg>-Xuse-ir</arg>
-                        <arg>-Xopt-in=kotlin.RequiresOptIn</arg>
-                        <arg>-Xskip-prerelease-check</arg>
                     </args>
                 </configuration>
             </plugin>
