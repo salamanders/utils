@@ -11,6 +11,7 @@ import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.ExperimentalTime
 import kotlin.time.TimeMark
 import kotlin.time.TimeSource
 
@@ -18,6 +19,7 @@ import kotlin.time.TimeSource
  * To cache a lot of small function calls to disk.
  * Only one app can use it at a time.
  */
+@OptIn(ExperimentalTime::class)
 class SimpleCache<K : Serializable, V : Serializable>(
     private val cacheFile: File = File("simpleCache.ser.gz"),
     private val persistEveryWrites: Int = 1_000,

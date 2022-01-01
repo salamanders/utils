@@ -11,6 +11,7 @@ import java.io.RandomAccessFile
 import java.nio.charset.Charset
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.time.DurationUnit
+import kotlin.time.ExperimentalTime
 import kotlin.time.TimeMark
 import kotlin.time.TimeSource.Monotonic
 
@@ -147,6 +148,7 @@ fun <T, R> Flow<T>.zipWithNext(transform: (a: T, b: T) -> R): Flow<R> = flow {
  * Best for one-line status files.
  * TODO: Refactor into a StateFlow
  */
+@OptIn(ExperimentalTime::class)
 fun File.changesToFlow(
     charset: Charset = Charset.defaultCharset(),
     lastModified: AtomicReference<TimeMark> = AtomicReference(Monotonic.markNow()),

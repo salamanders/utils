@@ -31,7 +31,7 @@ val Float.r: String
 fun Throwable.printDeepStackTrace() {
     println(this)
     try {
-        this.stackTrace?.also { it: Array<StackTraceElement> ->
+        this.stackTrace?.also {
             println("${this.javaClass}: ${this.message}")
         }?.forEach { trace ->
             println("  at ${trace.className}.${trace.methodName} (${trace.fileName}:${trace.lineNumber})")

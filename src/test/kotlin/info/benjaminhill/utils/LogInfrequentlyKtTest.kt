@@ -7,19 +7,19 @@ import java.util.concurrent.atomic.AtomicInteger
 internal class LogInfrequentlyKtTest {
 
     @Test
-    fun logInfreq() {
-        val linf = LogInfrequently()
+    fun logInfrequently() {
+        val li = LogInfrequently()
         repeat(20) {
-            linf.hit()
+            li.hit()
         }
     }
 
 
     @Test
-    fun logexp() {
+    fun logExp() {
         val logCount = AtomicInteger()
         repeat(20) { i ->
-            logexp(i) { "Hi: $i:${logCount.incrementAndGet()}" }
+            logExp(i) { "Hi: $i:${logCount.incrementAndGet()}" }
         }
         assertEquals(6, logCount.get())
     }

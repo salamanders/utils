@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicLong
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.DurationUnit
+import kotlin.time.ExperimentalTime
 import kotlin.time.TimeSource
 
 val LOG = KotlinLogging.logger {}
@@ -12,6 +13,7 @@ val LOG = KotlinLogging.logger {}
 /**
  * Spit out `private val logger = KotlinLogging.logger {}` `logger.info` log lines every few seconds
  */
+@OptIn(ExperimentalTime::class)
 class LogInfrequently constructor(
     private val delay: Duration = 10.seconds,
     private val logLine: (perSec: Double) -> String = { perSec: Double -> "Running at ${perSec.r}/sec" }
@@ -34,7 +36,7 @@ class LogInfrequently constructor(
 
 
 /** Print the line if the lineNum is a power of 2.  Good for series that might be big. */
-inline fun logexp(lineNum: Int, crossinline log: () -> String) {
+inline fun logExp(lineNum: Int, crossinline log: () -> String) {
     if ((lineNum and (lineNum - 1)) == 0) {
         LOG.info { log() }
     }
