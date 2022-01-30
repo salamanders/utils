@@ -3,9 +3,9 @@ package info.benjaminhill.utils
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 internal class CommandsKtTest {
@@ -15,17 +15,16 @@ internal class CommandsKtTest {
         LOG.info { "testRunCommand" }
 
         runBlocking {
-            val outputs = runCommand(arrayOf("echo", "hi there")).toList()
-            assertEquals(1, outputs.size)
-            assertEquals("hi there", outputs[0])
+            val outputs = runCommand(arrayOf("ping", "google.com"))
+            assertTrue(outputs.toList().joinToString().contains("minimum", ignoreCase = true))
         }
 
         runBlocking {
             assertThrows(CancellationException::class.java) {
                 runBlocking {
                     runCommand(
-                        command = arrayOf("sleep", "3"),
-                        maxDuration = 1.seconds
+                        command = arrayOf("ping", "google.com"),
+                        maxDuration = 1.milliseconds
                     ).toList()
                 }
             }
