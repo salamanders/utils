@@ -22,3 +22,11 @@ pom.xml:
 ```
 
 [![](https://jitpack.io/v/salamanders/utils.svg)](https://jitpack.io/#salamanders/utils)
+
+## Dev Misc
+
+```bash
+mvn versions:display-dependency-updates
+mvn versions:display-plugin-updates
+mvn versions:display-property-updates
+```

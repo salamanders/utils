@@ -2,12 +2,12 @@ package info.benjaminhill.utils
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertArrayEquals
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.io.File
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
-import kotlin.time.measureTime
 
 @OptIn(ExperimentalTime::class)
 internal class FlowsKtTest {
@@ -26,20 +26,6 @@ internal class FlowsKtTest {
             val endVals: List<Int> = (1..5).toList().asFlow().zipWithNext { a, b -> a * 100 + b }.toList()
             assertArrayEquals(intArrayOf(102, 203, 304, 405), endVals.toIntArray())
         }
-    }
-
-    @Test
-    fun testPMap() {
-        val execTime = measureTime {
-            runBlocking {
-                val endVals = (1..5).toList().asFlow().mapConcurrently { startVal: Int ->
-                    slowProcess(startVal)
-                }.toList()
-                assertEquals(listOf(2, 4, 6, 8, 10), endVals)
-            }
-        }
-        assertTrue(execTime > 0.5.seconds)
-        assertTrue(execTime < 2.seconds)
     }
 
     @Test

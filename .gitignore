@@ -310,8 +310,5 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/intellij,intellij+all,macos,osx,windows,linux,sublimetext,kotlin,java
-/target/classes/META-INF/utils.kotlin_module
-/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst
-/target/maven-archiver/pom.properties
-/target/classes/log4j2-test.properties
-/target/test-classes/META-INF/utils.kotlin_module
+
+/target/*

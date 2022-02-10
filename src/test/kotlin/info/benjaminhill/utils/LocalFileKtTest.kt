@@ -8,23 +8,23 @@ internal class LocalFileKtTest {
 
     @Test
     fun getFileFail() {
-        assertThrows(FileNotFoundException::class.java) { val f = getFile("fileDoesNotExist.txt") }
+        assertThrows(FileNotFoundException::class.java) { getFile("fileDoesNotExist.txt") }
     }
 
     @Test
     fun getFile() {
-        val f = getFile("pom.xml")
+        getFile("pom.xml")
     }
 
     @Test
     fun getFileResources() {
-        val f = getFile("src/test/resources/fileInResources.txt")
+        getFile("src/test/resources/fileInResources.txt")
     }
 
     @Test
     fun getFileResourcesBad() {
         assertThrows(FileNotFoundException::class.java) {
-            val f = getFile("resources/fileInResources.txt")
+            getFile("resources/fileInResources.txt")
         }
     }
 }

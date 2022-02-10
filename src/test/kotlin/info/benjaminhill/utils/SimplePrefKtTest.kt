@@ -1,9 +1,7 @@
 package info.benjaminhill.utils
 
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.prefs.Preferences
 
 internal class SimplePrefKtTest {
 
@@ -19,15 +17,9 @@ internal class SimplePrefKtTest {
         defaultValue = -1
     )
 
-    @BeforeEach
-    internal fun setUp() {
-        val prefs = Preferences.userNodeForPackage(this::class.java)
-        prefs.clear()
-        mySetting2 = 5
-    }
-
     @Test
     fun testPrefs() {
+        mySetting2 = 5
         assertEquals(-1, mySetting1)
         assertEquals(5, mySetting2)
         mySetting2 = 7
