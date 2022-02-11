@@ -60,3 +60,14 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
 }
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+            afterEvaluate {
+                artifactId = tasks.jar.get().archiveBaseName.get()
+            }
+        }
+    }
+}
