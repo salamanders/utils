@@ -1,5 +1,6 @@
 plugins {
     kotlin("jvm") version "1.6.10"
+    `maven-publish`
     application
     java
 }
@@ -32,6 +33,7 @@ dependencies {
     implementation("com.google.guava:guava:31.0.1-jre")
     implementation("com.google.code.gson:gson:2.8.9")
     implementation("org.apache.commons:commons-math3:3.6.1")
+    implementation("com.github.jitpack:gradle-simple:1.0")
 
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.2")
@@ -44,6 +46,8 @@ tasks.test {
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
+    withJavadocJar()
+    withSourcesJar()
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
