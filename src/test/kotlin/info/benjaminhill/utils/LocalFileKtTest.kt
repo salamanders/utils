@@ -13,7 +13,7 @@ internal class LocalFileKtTest {
 
     @Test
     fun getFile() {
-        getFile("pom.xml")
+        getFile("README.md")
     }
 
     @Test
