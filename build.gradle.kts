@@ -1,8 +1,8 @@
 plugins {
     kotlin("jvm") version "1.6.10"
-    `maven-publish`
-    application
     java
+    `maven-publish`
+
 }
 
 group = "info.benjaminhill"
@@ -32,7 +32,7 @@ dependencies {
     implementation("org.slf4j:slf4j-api:1.7.35")
     implementation("com.google.guava:guava:31.0.1-jre")
     implementation("com.google.code.gson:gson:2.8.9")
-    implementation("org.apache.commons:commons-math3:3.6.1")
+    implementation("com.github.jcastro-inf:commons-math4:598edc1273")
     implementation("com.github.jitpack:gradle-simple:1.0")
 
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")

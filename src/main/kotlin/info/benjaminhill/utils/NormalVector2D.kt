@@ -1,6 +1,6 @@
 package info.benjaminhill.utils
 
-import org.apache.commons.math3.geometry.euclidean.twod.Vector2D
+import org.apache.commons.math4.geometry.euclidean.twod.Vector2D
 import kotlin.math.min
 
 /** Extra check to make sure a sane normal vector */
