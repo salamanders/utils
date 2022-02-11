@@ -2,7 +2,6 @@ plugins {
     kotlin("jvm") version "1.6.10"
     application
     java
-    `maven-publish`
 }
 
 group = "info.benjaminhill"
@@ -51,12 +50,6 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
     kotlinOptions {
         freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn")
         jvmTarget = "1.8"
-    }
-}
-
-publishing {
-    publications.create<MavenPublication>("maven") {
-        from(components["java"])
     }
 }
 
