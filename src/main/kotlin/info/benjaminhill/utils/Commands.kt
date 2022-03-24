@@ -48,12 +48,14 @@ fun InputStream.toTimedLines(): Flow<Pair<Instant, String>> =
         }.flowOn(Dispatchers.IO)
 
 fun InputStream.toTimedSamples(sampleSize: Int = 4): Flow<Pair<Instant, ByteArray>> =
-    flow {
-        val bufferedInputStream = this@toTimedSamples.buffered()
-        do {
-            val sample = bufferedInputStream.readNBytes(sampleSize)
-            emit(Instant.now() to sample)
-        } while (sample.size == sampleSize)
+    flow<Pair<Instant, ByteArray>> {
+        this@toTimedSamples.buffered().use { bufferedInputStream->
+            do {
+                val ba = ByteArray(sampleSize)
+                val numRead = bufferedInputStream.read(ba, 0, sampleSize)
+                emit(Instant.now() to ba)
+            } while (numRead == sampleSize)
+        }
     }
         .onStart { LOG.info { "toTimedSamples.onStart" } }
         .onCompletion {
