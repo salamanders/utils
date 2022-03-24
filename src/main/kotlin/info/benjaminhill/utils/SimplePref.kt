@@ -1,11 +1,15 @@
 package info.benjaminhill.utils
 
+import java.io.*
 import java.util.prefs.Preferences
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 
-// https://stackoverflow.com/questions/66462586/java-preferences-api-with-kotlin-delegated-properties
+
+/**
+ * https://stackoverflow.com/questions/66462586/java-preferences-api-with-kotlin-delegated-properties
+ */
 inline fun <reified T : Any> preference(enclosingClass: Class<*>, key: String, defaultValue: T) =
     PreferenceDelegate(
         preferences = Preferences.userNodeForPackage(enclosingClass),
@@ -21,6 +25,32 @@ class PreferenceDelegate<T : Any>(
     private val type: KClass<T>
 ) : ReadWriteProperty<Any, T> {
 
+    private var serializedDefault: ByteArray? = null
+
+    init {
+        when (type) {
+            Int::class,
+            Long::class,
+            Float::class,
+            Boolean::class,
+            String::class,
+            ByteArray::class -> {
+                // skip
+            }
+            else -> {
+                if (defaultValue is Serializable) {
+                    ByteArrayOutputStream().use { bos ->
+                        ObjectOutputStream(bos).use { oos ->
+                            oos.writeObject(defaultValue)
+                            oos.flush()
+                            serializedDefault = bos.toByteArray()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     @Suppress("UNCHECKED_CAST")
     override fun setValue(thisRef: Any, property: KProperty<*>, value: T) {
         with(preferences) {
@@ -31,7 +61,19 @@ class PreferenceDelegate<T : Any>(
                 Boolean::class -> putBoolean(key, value as Boolean)
                 String::class -> put(key, value as String)
                 ByteArray::class -> putByteArray(key, value as ByteArray)
-                else -> error("Unsupported preference type $type.")
+                else -> {
+                    if (value is Serializable) {
+                        ByteArrayOutputStream().use { bos ->
+                            ObjectOutputStream(bos).use { oos ->
+                                oos.writeObject(value)
+                                oos.flush()
+                                putByteArray("${key}_serializable", bos.toByteArray())
+                            }
+                        }
+                    } else {
+                        error("Unsupported preference type $type.")
+                    }
+                }
             }
         }
     }
@@ -46,7 +88,13 @@ class PreferenceDelegate<T : Any>(
                 Boolean::class -> getBoolean(key, defaultValue as Boolean)
                 String::class -> get(key, defaultValue as String)
                 ByteArray::class -> getByteArray(key, defaultValue as ByteArray)
-                else -> error("Unsupported preference type $type.")
+                else -> {
+                    ByteArrayInputStream(getByteArray("${key}_serializable", serializedDefault)).use { bis ->
+                        ObjectInputStream(bis).use { ois ->
+                            ois.readObject()
+                        }
+                    }
+                }
             }
         } as T
     }

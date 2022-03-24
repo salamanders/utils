@@ -1,28 +1,26 @@
 package info.benjaminhill.utils
 
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.stream.consumeAsFlow
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import kotlin.time.Duration.Companion.nanoseconds
-import kotlin.time.Duration.Companion.seconds
-import kotlin.time.ExperimentalTime
+import java.io.UncheckedIOException
+import java.time.Duration
 
 internal class CommandsKtTest {
 
-    @OptIn(ExperimentalTime::class)
     @Test
-    fun testRunCommand() {
+    fun testTimedProcess() {
         LOG.info { "testRunCommand" }
-
         runBlocking {
-            val outputs = runCommand(
+            val (inputStream, _) = timedProcess(
                 command = arrayOf("ping", "google.com", "-c 2"),
-                maxDuration = 10.seconds
+                maxDuration = Duration.ofSeconds(10)
             )
-            val allOutput = outputs.toList().joinToString()
+            val allOutput = inputStream.bufferedReader().readLines().joinToString("\n")
             // println("OUTPUT: $allOutput")
             assertTrue(allOutput.contains("time", ignoreCase = true))
         }
@@ -31,14 +29,36 @@ internal class CommandsKtTest {
     @Test
     fun testRunCommandTimeout() {
         runBlocking {
-            assertThrows(CancellationException::class.java) {
+            assertThrows(UncheckedIOException::class.java) {
                 runBlocking {
-                    runCommand(
+                    val (inputStream, _) = timedProcess(
                         command = arrayOf("ping", "google.com"),
-                        maxDuration = 1.nanoseconds
-                    ).toList()
+                        maxDuration = Duration.ofNanos(1)
+                    )
+                    inputStream.bufferedReader().lines().consumeAsFlow().collect {
+                        println(it)
+                    }
                 }
             }
         }
+    }
+
+    @Test
+    fun toTimedLines() {
+        runBlocking {
+            val (_, line) = timedProcess(
+                command = arrayOf("ping", "google.com", "-c 2"),
+                maxDuration = Duration.ofSeconds(10)
+            ).first.toTimedLines()
+                .filter { it.second.contains("data bytes") }
+                .first()
+            assertTrue(line.contains("bytes"))
+        }
+    }
+
+
+    @Test
+    fun toTimedSamples() {
+        // TODO
     }
 }

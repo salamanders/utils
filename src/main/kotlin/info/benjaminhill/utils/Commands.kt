@@ -1,53 +1,63 @@
 package info.benjaminhill.utils
 
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.time.withTimeout
 import java.io.File
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.nanoseconds
-import kotlin.time.Duration.Companion.seconds
-import kotlin.time.toJavaDuration
+import java.io.InputStream
+import java.time.Duration
+import java.time.Instant
+import java.util.*
+import kotlin.concurrent.schedule
 
 /**
  * @param command All command "parts".  Things with spaces (like a file path) should not be escaped or quoted, but should be a single arg
- * @return All the results and errors as a single flow.  Caller must filter for the desired line in the results.
+ * @param maxDuration optional to ensure that the process ends.
+ * @return inputStream to errorStream
  */
-suspend fun runCommand(
+fun timedProcess(
     command: Array<String>,
     workingDir: File = File("."),
-    maxDuration: Duration = 5.seconds
-): Flow<String> = withTimeout(duration = maxDuration.toJavaDuration()) {
-    val timeChecker: Job
+    maxDuration: Duration? = null
+): Pair<InputStream, InputStream> =
     ProcessBuilder()
-        .redirectErrorStream(true)
         .command(*command)
         .directory(workingDir)
-        .start()!!.also { process ->
-            // Because you can't expect newlines to happen if the process locked up.
-            timeChecker = launch {
-                val startTime = System.nanoTime().nanoseconds
-                val sleepDuration = maxDuration / 20
-                while (process.isAlive) {
-                    if (System.nanoTime().nanoseconds - startTime > maxDuration) {
-                        process.destroyForcibly()
-                        throw CancellationException("Ran over time: $maxDuration")
+        .start()!!.let { process ->
+            if (maxDuration != null) {
+                Timer().schedule(maxDuration.toMillis()) {
+                    if (process.isAlive) {
+                        process.destroy()
                     }
-                    delay(sleepDuration)
                 }
             }
+
+            LOG.debug { "timedProcess launched: `${command.joinToString(" ")}`" }
+            process.inputStream to process.errorStream
         }
-        .inputStream
-        .bufferedReader()
+
+
+fun InputStream.toTimedLines(): Flow<Pair<Instant, String>> =
+    bufferedReader()
         .lineSequence()
+        .map { Instant.now() to it }
         .asFlow()
-        .buffer()
-        .flowOn(Dispatchers.IO)
+        .onStart { LOG.info { "toTimedLines.onStart" } }
         .onCompletion {
-            timeChecker.cancel() // redundant
+            LOG.info { "toTimedLines.onCompletion, closing InputStream" }
+            this@toTimedLines.close()
+        }.flowOn(Dispatchers.IO)
+
+fun InputStream.toTimedSamples(sampleSize: Int = 4): Flow<Pair<Instant, ByteArray>> =
+    flow {
+        val bufferedInputStream = this@toTimedSamples.buffered()
+        do {
+            val sample = bufferedInputStream.readNBytes(sampleSize)
+            emit(Instant.now() to sample)
+        } while (sample.size == sampleSize)
+    }
+        .onStart { LOG.info { "toTimedSamples.onStart" } }
+        .onCompletion {
+            LOG.info { "toTimedSamples.onCompletion, closing InputStream" }
+            this@toTimedSamples.close()
         }
-        .catch { error ->
-            // Something worse than the Error Stream (like unknown command)
-            error("Error while running command `${command.joinToString(" ")}`: $error")
-        }
-}
+        .flowOn(Dispatchers.IO)
