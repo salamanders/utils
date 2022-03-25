@@ -64,8 +64,13 @@ fun InputStream.toTimedSamples(sampleSize: Int = 4): Flow<Pair<Instant, ByteArra
             do {
                 val ba = ByteArray(sampleSize)
                 val numRead = bufferedInputStream.read(ba, 0, sampleSize)
-                emit(Instant.now() to ba)
-            } while (numRead == sampleSize)
+                val smallerBuffer = if(numRead == sampleSize) {
+                    ba
+                } else {
+                    ba.copyOf(numRead)
+                }
+                emit(Instant.now() to smallerBuffer)
+            } while (numRead > -1)
         }
     }
         .onStart { logger.info { "toTimedSamples.onStart" } }
