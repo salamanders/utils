@@ -1,6 +1,5 @@
 package info.benjaminhill.utils
 
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.take
@@ -11,20 +10,19 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.io.UncheckedIOException
 import java.time.Duration
-import java.time.Instant
 import kotlin.test.assertEquals
 
 internal class CommandsKtTest {
 
     @Test
     fun testTimedProcess() {
-        LOG.info { "testRunCommand" }
+        println("testRunCommand")
         runBlocking {
-            val (inputStream, _) = timedProcess(
+            val processIO = timedProcess(
                 command = arrayOf("ping", "google.com", "-c 2"),
                 maxDuration = Duration.ofSeconds(10)
             )
-            val allOutput = inputStream.bufferedReader().readLines().joinToString("\n")
+            val allOutput = processIO.getFrom.bufferedReader().readLines().joinToString("\n")
             // println("OUTPUT: $allOutput")
             assertTrue(allOutput.contains("time", ignoreCase = true))
         }
@@ -35,11 +33,11 @@ internal class CommandsKtTest {
         runBlocking {
             assertThrows(UncheckedIOException::class.java) {
                 runBlocking {
-                    val (inputStream, _) = timedProcess(
+                    val processIO = timedProcess(
                         command = arrayOf("ping", "google.com"),
                         maxDuration = Duration.ofNanos(1)
                     )
-                    inputStream.bufferedReader().lines().consumeAsFlow().collect {
+                    processIO.getFrom.bufferedReader().lines().consumeAsFlow().collect {
                         println(it)
                     }
                 }
@@ -50,26 +48,29 @@ internal class CommandsKtTest {
     @Test
     fun toTimedLines() {
         runBlocking {
-            val (_, line) = timedProcess(
+            val processIO = timedProcess(
                 command = arrayOf("ping", "google.com", "-c 2"),
                 maxDuration = Duration.ofSeconds(10)
-            ).first.toTimedLines()
+            )
+            val (_, line) = processIO.getFrom.toTimedLines()
                 .filter { it.second.contains("data bytes") }
                 .first()
             assertTrue(line.contains("bytes"))
-        }
-    }
 
-    @Test
-    fun toTimedSamples() {
-        runBlocking {
-            timedProcess(
-                command=arrayOf("cat", getFile("README.md").toString())
-            ).first.toTimedSamples(
-                sampleSize = 8,
-            ).take(1) .collect { (instant, chunk)->
-                println("Instant: $instant, chunk:$chunk")
-                assertEquals(8, chunk.size)
+        }
+
+        @Test
+        fun toTimedSamples() {
+            runBlocking {
+                val processIO = timedProcess(
+                    command = arrayOf("cat", getFile("README.md").toString())
+                )
+                processIO.getFrom.toTimedSamples(
+                    sampleSize = 8,
+                ).take(1).collect { (instant, chunk) ->
+                    println("Instant: $instant, chunk:$chunk")
+                    assertEquals(8, chunk.size)
+                }
             }
         }
     }

@@ -1,12 +1,15 @@
 package info.benjaminhill.utils
 
 import com.google.gson.Gson
+import mu.KotlinLogging
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.zip.GZIPInputStream
 
-private val gson: Gson by lazy {
+private val logger = KotlinLogging.logger {}
+
+val gson: Gson by lazy {
     Gson()
 }
 
@@ -14,10 +17,10 @@ private val gson: Gson by lazy {
 fun URL.readLinesGZip(): List<String> = (openConnection() as HttpURLConnection).let { con ->
     con.setRequestProperty("Accept-Encoding", "gzip")
     if ("gzip" == con.contentEncoding) {
-        LOG.debug { "Able to read GZIP content from '${this}'" }
+        logger.debug { "Able to read GZIP content from '${this}'" }
         InputStreamReader(GZIPInputStream(con.inputStream))
     } else {
-        LOG.debug { "No GZIP, fallback to plain content from '${this}'" }
+        logger.debug { "No GZIP, fallback to plain content from '${this}'" }
         InputStreamReader(con.inputStream)
     }
 }.readLines()

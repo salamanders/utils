@@ -2,38 +2,49 @@ package info.benjaminhill.utils
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
+import mu.KotlinLogging
 import java.io.File
 import java.io.InputStream
+import java.io.OutputStream
 import java.time.Duration
 import java.time.Instant
 import java.util.*
 import kotlin.concurrent.schedule
 
+private val logger = KotlinLogging.logger {}
+
+data class ProcessIO(
+    val process: Process,
+    val sendToProcess: OutputStream,
+    val getFrom: InputStream,
+    val getErrorFrom: InputStream,
+)
+
 /**
  * @param command All command "parts".  Things with spaces (like a file path) should not be escaped or quoted, but should be a single arg
  * @param maxDuration optional to ensure that the process ends.
- * @return inputStream to errorStream
+ * @return process, inputStream, errorStream
  */
 fun timedProcess(
     command: Array<String>,
     workingDir: File = File("."),
     maxDuration: Duration? = null
-): Pair<InputStream, InputStream> =
-    ProcessBuilder()
+): ProcessIO {
+    val process = ProcessBuilder()
         .command(*command)
         .directory(workingDir)
-        .start()!!.let { process ->
-            if (maxDuration != null) {
-                Timer().schedule(maxDuration.toMillis()) {
-                    if (process.isAlive) {
-                        process.destroy()
-                    }
-                }
+        .start()!!
+    if (maxDuration != null) {
+        Timer().schedule(maxDuration.toMillis()) {
+            if (process.isAlive) {
+                logger.info { "Process timed out, destroying." }
+                process.destroy()
             }
-
-            LOG.debug { "timedProcess launched: `${command.joinToString(" ")}`" }
-            process.inputStream to process.errorStream
         }
+    }
+    logger.debug { "timedProcess launched: `${command.joinToString(" ")}`" }
+    return ProcessIO(process, process.outputStream, process.inputStream, process.errorStream)
+}
 
 
 fun InputStream.toTimedLines(): Flow<Pair<Instant, String>> =
@@ -41,15 +52,15 @@ fun InputStream.toTimedLines(): Flow<Pair<Instant, String>> =
         .lineSequence()
         .map { Instant.now() to it }
         .asFlow()
-        .onStart { LOG.info { "toTimedLines.onStart" } }
+        .onStart { logger.info { "toTimedLines.onStart" } }
         .onCompletion {
-            LOG.info { "toTimedLines.onCompletion, closing InputStream" }
+            logger.info { "toTimedLines.onCompletion, closing InputStream" }
             this@toTimedLines.close()
         }.flowOn(Dispatchers.IO)
 
 fun InputStream.toTimedSamples(sampleSize: Int = 4): Flow<Pair<Instant, ByteArray>> =
     flow<Pair<Instant, ByteArray>> {
-        this@toTimedSamples.buffered().use { bufferedInputStream->
+        this@toTimedSamples.buffered().use { bufferedInputStream ->
             do {
                 val ba = ByteArray(sampleSize)
                 val numRead = bufferedInputStream.read(ba, 0, sampleSize)
@@ -57,9 +68,9 @@ fun InputStream.toTimedSamples(sampleSize: Int = 4): Flow<Pair<Instant, ByteArra
             } while (numRead == sampleSize)
         }
     }
-        .onStart { LOG.info { "toTimedSamples.onStart" } }
+        .onStart { logger.info { "toTimedSamples.onStart" } }
         .onCompletion {
-            LOG.info { "toTimedSamples.onCompletion, closing InputStream" }
+            logger.info { "toTimedSamples.onCompletion, closing InputStream" }
             this@toTimedSamples.close()
         }
         .flowOn(Dispatchers.IO)

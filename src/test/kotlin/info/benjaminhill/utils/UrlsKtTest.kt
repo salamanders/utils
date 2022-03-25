@@ -1,35 +1,31 @@
 package info.benjaminhill.utils
 
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import java.net.URL
+import kotlin.test.assertContains
 
 internal class UrlsKtTest {
 
     @Test
     fun getToObject() {
-        val result = URL("https://filesamples.com/samples/code/json/sample1.json")
-            .getToObject(TestResult::class.java)
-        assertEquals("Apple", result.fruit)
-        assertEquals("Large", result.size)
-        assertNull(result.notHere)
+        val result = URL("https://raw.githubusercontent.com/LearnWebCode/json-example/master/animals-1.json")
+            .getToObject(Array<Pet>::class.java)
+
+        assertEquals(3, result.size)
+        assertContains(arrayOf("cat", "dog"), result.first().species)
     }
 
     @Test
     fun delete() {
         // Hope they don't let me delete this!
-        val result = URL("https://filesamples.com/samples/code/json/sample1.json").delete()
-        assertEquals(405, result)
+        val result = URL("https://raw.githubusercontent.com/LearnWebCode/json-example/master/animals-1.json").delete()
+        assertEquals(403, result)
     }
 
-    data class MissingStuff(
-        val name: String
-    )
 
-    data class TestResult(
-        val fruit: String,
-        val size: String,
-        val notHere: List<MissingStuff>?
+    data class Pet(
+        val name: String,
+        val species: String,
     )
 }

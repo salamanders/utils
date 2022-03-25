@@ -8,7 +8,7 @@ import kotlin.time.DurationUnit
 import kotlin.time.ExperimentalTime
 import kotlin.time.TimeSource
 
-val LOG = KotlinLogging.logger {}
+val infrequentLogger = KotlinLogging.logger {}
 
 /**
  * Spit out `private val logger = KotlinLogging.logger {}` `logger.info` log lines every few seconds
@@ -27,7 +27,11 @@ class LogInfrequently constructor(
     fun hit() {
         hitCount.incrementAndGet()
         if (startTime.elapsedNow() > delay) {
-            LOG.info { logLine(hitCount.toDouble() / startTime.elapsedNow().toDouble(DurationUnit.SECONDS)) }
+            infrequentLogger.info {
+                logLine(
+                    hitCount.toDouble() / startTime.elapsedNow().toDouble(DurationUnit.SECONDS)
+                )
+            }
             hitCount.set(0)
             startTime = TimeSource.Monotonic.markNow()
         }
@@ -38,6 +42,6 @@ class LogInfrequently constructor(
 /** Print the line if the lineNum is a power of 2.  Good for series that might be big. */
 inline fun logExp(lineNum: Int, crossinline log: () -> String) {
     if ((lineNum and (lineNum - 1)) == 0) {
-        LOG.info { log() }
+        infrequentLogger.info { log() }
     }
 }

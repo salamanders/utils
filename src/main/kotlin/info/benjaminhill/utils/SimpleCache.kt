@@ -1,5 +1,7 @@
 package info.benjaminhill.utils
 
+import mu.KLoggable
+import mu.KotlinLogging
 import java.io.File
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
@@ -14,6 +16,8 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.ExperimentalTime
 import kotlin.time.TimeMark
 import kotlin.time.TimeSource
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * To cache a lot of small function calls to disk.
@@ -34,7 +38,7 @@ class SimpleCache<K : Serializable, V : Serializable>(
             ObjectInputStream(GZIPInputStream(cacheFile.inputStream())).use { inputStream ->
                 @Suppress("UNCHECKED_CAST")
                 cache.putAll(inputStream.readObject() as Map<K, V>)
-                LOG.debug { "SimpleCache startup loaded ${cache.size}" }
+                logger.debug { "SimpleCache startup loaded ${cache.size}" }
             }
         }
     }
@@ -45,7 +49,7 @@ class SimpleCache<K : Serializable, V : Serializable>(
     fun persist() {
         ObjectOutputStream(GZIPOutputStream(cacheFile.outputStream())).use {
             it.writeObject(cache)
-            LOG.debug { "SimpleCache persisted ${cache.size}" }
+            logger.debug { "SimpleCache persisted ${cache.size}" }
         }
         mutationCount.set(0)
         lastPersisted.set(TimeSource.Monotonic.markNow())
@@ -63,7 +67,7 @@ class SimpleCache<K : Serializable, V : Serializable>(
             mutationCount.incrementAndGet() >= persistEveryWrites ||
             lastPersisted.get().elapsedNow() >= persistEveryDuration
         ) {
-            LOG.debug { "SimpleCache auto-persisting" }
+            logger.debug { "SimpleCache auto-persisting" }
             persist()
         }
     }
@@ -75,10 +79,14 @@ class SimpleCache<K : Serializable, V : Serializable>(
     suspend operator fun invoke(key: K, exec: suspend () -> V): V {
         if (!cache.containsKey(key)) {
             set(key, exec())
-            LOG.trace { "SimpleCache miss on '$key'" }
+            logger.trace { "SimpleCache miss on '$key'" }
         } else {
-            LOG.trace { "SimpleCache hit on '$key'" }
+            logger.trace { "SimpleCache hit on '$key'" }
         }
         return cache[key]!!
+    }
+
+    companion object : Any(), KLoggable {
+        override val logger = logger()
     }
 }
