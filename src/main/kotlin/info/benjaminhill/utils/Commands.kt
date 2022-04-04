@@ -26,14 +26,9 @@ data class ProcessIO(
  * @return process, inputStream, errorStream
  */
 fun timedProcess(
-    command: Array<String>,
-    workingDir: File = File("."),
-    maxDuration: Duration? = null
+    command: Array<String>, workingDir: File = File("."), maxDuration: Duration? = null
 ): ProcessIO {
-    val process = ProcessBuilder()
-        .command(*command)
-        .directory(workingDir)
-        .start()!!
+    val process = ProcessBuilder().command(*command).directory(workingDir).start()!!
     if (maxDuration != null) {
         Timer().schedule(maxDuration.toMillis()) {
             if (process.isAlive) {
@@ -48,34 +43,30 @@ fun timedProcess(
 
 
 fun InputStream.toTimedLines(): Flow<Pair<Instant, String>> =
-    bufferedReader()
-        .lineSequence()
-        .map { Instant.now() to it }
-        .asFlow()
-        .onStart { logger.info { "toTimedLines.onStart" } }
-        .onCompletion {
+    bufferedReader().lineSequence().map { Instant.now() to it }.asFlow()
+        .onStart { logger.info { "toTimedLines.onStart" } }.onCompletion {
             logger.info { "toTimedLines.onCompletion, closing InputStream" }
             this@toTimedLines.close()
         }.flowOn(Dispatchers.IO)
 
-fun InputStream.toTimedSamples(sampleSize: Int = 4): Flow<Pair<Instant, ByteArray>> =
-    flow<Pair<Instant, ByteArray>> {
-        this@toTimedSamples.buffered().use { bufferedInputStream ->
-            do {
-                val ba = ByteArray(sampleSize)
-                val numRead = bufferedInputStream.read(ba, 0, sampleSize)
-                val smallerBuffer = if(numRead == sampleSize) {
-                    ba
-                } else {
-                    ba.copyOf(numRead)
+fun InputStream.toTimedSamples(sampleSize: Int = 4): Flow<Pair<Instant, ByteArray>> = flow<Pair<Instant, ByteArray>> {
+    this@toTimedSamples.buffered().use { bufferedInputStream ->
+        do {
+            val ba = ByteArray(sampleSize)
+            val numRead = bufferedInputStream.read(ba, 0, sampleSize)
+            when (numRead) {
+                sampleSize -> emit(Instant.now() to ba)
+                in 1 until sampleSize -> emit(Instant.now() to ba.copyOf(numRead))
+                0 -> {
+                    logger.warn { "toTimedSamples should have blocked on an empty read" }
                 }
-                emit(Instant.now() to smallerBuffer)
-            } while (numRead > -1)
-        }
+                -1 -> {
+                    logger.info { "toTimedSamples reached end of stream" }
+                }
+            }
+        } while (numRead > -1)
     }
-        .onStart { logger.info { "toTimedSamples.onStart" } }
-        .onCompletion {
-            logger.info { "toTimedSamples.onCompletion, closing InputStream" }
-            this@toTimedSamples.close()
-        }
-        .flowOn(Dispatchers.IO)
+}.onStart { logger.info { "toTimedSamples.onStart" } }.onCompletion {
+        logger.info { "toTimedSamples.onCompletion, closing InputStream" }
+        this@toTimedSamples.close()
+    }.flowOn(Dispatchers.IO)

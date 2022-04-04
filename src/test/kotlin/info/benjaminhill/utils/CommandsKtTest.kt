@@ -19,8 +19,7 @@ internal class CommandsKtTest {
         println("testRunCommand")
         runBlocking {
             val processIO = timedProcess(
-                command = arrayOf("ping", "google.com", "-c 2"),
-                maxDuration = Duration.ofSeconds(10)
+                command = arrayOf("ping", "google.com", "-c", "2"), maxDuration = Duration.ofSeconds(10)
             )
             val allOutput = processIO.getFrom.bufferedReader().readLines().joinToString("\n")
             // println("OUTPUT: $allOutput")
@@ -34,8 +33,7 @@ internal class CommandsKtTest {
             assertThrows(UncheckedIOException::class.java) {
                 runBlocking {
                     val processIO = timedProcess(
-                        command = arrayOf("ping", "google.com"),
-                        maxDuration = Duration.ofNanos(1)
+                        command = arrayOf("ping", "google.com"), maxDuration = Duration.ofNanos(1)
                     )
                     processIO.getFrom.bufferedReader().lines().consumeAsFlow().collect {
                         println(it)
@@ -49,28 +47,26 @@ internal class CommandsKtTest {
     fun toTimedLines() {
         runBlocking {
             val processIO = timedProcess(
-                command = arrayOf("ping", "google.com", "-c 2"),
-                maxDuration = Duration.ofSeconds(10)
+                command = arrayOf("ping", "google.com", "-c 2"), maxDuration = Duration.ofSeconds(10)
             )
-            val (_, line) = processIO.getFrom.toTimedLines()
-                .filter { it.second.contains("data bytes") }
-                .first()
+            val (_, line) = processIO.getFrom.toTimedLines().filter { it.second.contains("data bytes") }.first()
             assertTrue(line.contains("bytes"))
-
         }
+    }
 
-        @Test
-        fun toTimedSamples() {
-            runBlocking {
-                val processIO = timedProcess(
-                    command = arrayOf("cat", getFile("README.md").toString())
-                )
-                processIO.getFrom.toTimedSamples(
-                    sampleSize = 8,
-                ).take(1).collect { (instant, chunk) ->
-                    println("Instant: $instant, chunk:$chunk")
-                    assertEquals(8, chunk.size)
-                }
+    @Test
+    fun toTimedSamples() {
+        runBlocking {
+            val fileLocation = getFile("README.md")
+            assertTrue(fileLocation.canRead()) { "Unable to find README.md"}
+            val processIO = timedProcess(
+                command = arrayOf("cat", fileLocation.toString())
+            )
+            processIO.getFrom.toTimedSamples(
+                sampleSize = 8,
+            ).take(1).collect { (instant, chunk) ->
+                println("Instant: $instant, chunk:$chunk")
+                assertEquals(8, chunk.size)
             }
         }
     }
