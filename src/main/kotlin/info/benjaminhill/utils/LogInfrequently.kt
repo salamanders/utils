@@ -27,10 +27,14 @@ class LogInfrequently constructor(
     fun hit() {
         hitCount.incrementAndGet()
         if (startTime.elapsedNow() > delay) {
-            infrequentLogger.info {
-                logLine(
-                    hitCount.toDouble() / startTime.elapsedNow().toDouble(DurationUnit.SECONDS)
-                )
+            try {
+                infrequentLogger.info {
+                    logLine(
+                        hitCount.toDouble() / startTime.elapsedNow().toDouble(DurationUnit.SECONDS)
+                    )
+                }
+            } catch (e: Error) {
+                infrequentLogger.error { "Error when trying to log: $e" }
             }
             hitCount.set(0)
             startTime = TimeSource.Monotonic.markNow()
